@@ -4,7 +4,7 @@
 .include "macros.asm"
 
 .data
-intro: .asciiz "Welcome to Tic Tac Toe!"
+intro: .asciiz "Welcome to Tic Tac Toe!\n\n"
 modePrompt: .asciiz "\n\nWould you like to play (1) One Player or (2) Two Player: "
 onePlayerStartPrompt: .asciiz "First move goes to (1) You or (2) CPU: "
 twoPlayersStartPrompt: .asciiz "First move goes to (1) Player 1 or (2) Player 2: "
@@ -27,6 +27,7 @@ exitMessage: .asciiz "\nThank you for playing!"
 main:
 	#prints introduction to program string
 	printString(intro)
+	ogBoard
 
 
 #start of gameplay		
