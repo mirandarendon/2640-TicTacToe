@@ -45,34 +45,34 @@ aGame:
 
 #game against computer	
 onePlay:
-printString(onePlayerStartPrompt)
-getInt
-move $t3, $v0 #$t3 stores who gets the first move
-#logic is currently not accounting for who starts. Might not ask in final product
-printString(userTurnPrompt)
-printString(moveChoice)
-getInt
-move $t4, $v0 #$t4 store where user wants to mark
-j replay
-#game with two users
-twoPlay:
-printString(twoPlayersStartPrompt)
-getInt
-move $t3, $v0 #$t3 stores who gets the first move
-#logic is currently not accounting for who starts. Might not ask in final product
+	printString(onePlayerStartPrompt)
+	getInt
+	move $t3, $v0 #$t3 stores who gets the first move
+	#logic is currently not accounting for who starts. Might not ask in final product
+	printString(userTurnPrompt)
+	printString(moveChoice)
+	getInt
+	move $t4, $v0 #$t4 store where user wants to mark
+	j replay
+	#game with two users
+	twoPlay:
+	printString(twoPlayersStartPrompt)
+	getInt
+	move $t3, $v0 #$t3 stores who gets the first move
+	#logic is currently not accounting for who starts. Might not ask in final product
 
-#Player 1 Turn
-printString(Player1TurnPrompt)
-printString(moveChoice)
-getInt
-move $t4, $v0 #$t4 store where Player 1 wants to mark
-#Player 2 Turn
-printString(Player2TurnPrompt)
-printString(moveChoice)
-getInt
-move $t5, $v0 #$t5 store where Player 2 wants to mark
+	#Player 1 Turn
+	printString(Player1TurnPrompt)
+	printString(moveChoice)
+	getInt
+	move $t4, $v0 #$t4 store where Player 1 wants to mark
+	#Player 2 Turn
+	printString(Player2TurnPrompt)
+	printString(moveChoice)
+	getInt
+	move $t5, $v0 #$t5 store where Player 2 wants to mark
 
-j replay
+	j replay
 
 #chack if user wants to play again			
 replay:		
