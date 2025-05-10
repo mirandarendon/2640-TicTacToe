@@ -39,7 +39,7 @@ aGame:
 	beq $t0, 1, onePlay
 	beq $t0, 2, twoPlay
 	
-	#if neither valid print prompt and asks again
+	#if not valid print prompt and asks again
 	printString(reprompt)
 	j aGame
 
@@ -50,6 +50,10 @@ onePlay:
 	move $t3, $v0 #$t3 stores who gets the first move
 	#logic is currently not accounting for who starts. Might not ask in final product
 	printString(userTurnPrompt)
+	#if not valid print prompt and asks again
+	#printString(reprompt)
+	#j onePlay
+	
 	printString(moveChoice)
 	getInt
 	move $t4, $v0 #$t4 store where user wants to mark
@@ -92,3 +96,20 @@ exit:
 	printString(exitMessage)
 	li $v0, 10
 	syscall
+
+#trap to catch improper data types
+.kdata
+	invalid: .asciiz"\nImproper input. Value is not an integer\n"
+.ktext 0x80000180
+	li $v0, 4
+	la $a0, invalid
+	syscall
+	move $v0,$k0   # Restore $v0
+   	move $a0,$k1   # Restore $a0
+   	mfc0 $k0,$14   # Coprocessor 0 register $14 has address of trapping instruction
+   	addi $k0,$k0,4 # Add 4 to point to next instruction
+   	mtc0 $k0,$14   # Store new address back into $14
+   	eret           # Error return; set PC to value in $14
+	#la $k0, aGame #load address of main in .text
+	#mtc0 $k0, $14 #move main address to coprocessor return address register
+	#eret #return back to program as specified (Basically jummps to value in register $14)
