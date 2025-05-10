@@ -5,7 +5,7 @@
 
 .data
 .space 256 #save space for bitmap colors
-	.space 1000 #save space for bitmap colors
+	.space 1000 #save space for bitmap
 	.eqv BLUE 0x189BCC
 	.eqv GREEN 0xbecc41
 	.eqv LIBLUE 0x8dd7f8
