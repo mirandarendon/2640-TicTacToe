@@ -4,6 +4,11 @@
 .include "macros.asm"
 
 .data
+.space 256 #save space for bitmap colors
+	.space 1000 #save space for bitmap colors
+	.eqv BLUE 0x189BCC
+	.eqv GREEN 0xbecc41
+	.eqv LIBLUE 0x8dd7f8
 intro: .asciiz "Welcome to Tic Tac Toe!\n\n"
 modePrompt: .asciiz "\n\nWould you like to play (1) One Player or (2) Two Player: "
 onePlayerStartPrompt: .asciiz "First move goes to (1) You or (2) CPU: "
@@ -28,6 +33,8 @@ main:
 	#prints introduction to program string
 	printString(intro)
 	ogBoard
+	ogBoardBitmap
+
 
 
 #start of gameplay		
