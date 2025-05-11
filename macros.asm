@@ -1,8 +1,5 @@
-#Names: Eulalia Pedro Andres, Marlenne Salcido, Miranda Rendon
+#Names: Eulalia Pedro Andres, Miranda Rendon, Marlenne Salcido
 #macros
-
-
-
 
 .macro printString(%string)
 	li $v0, 4

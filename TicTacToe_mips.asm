@@ -1,4 +1,4 @@
-#Names: Eulalia Pedro Andres, Marlenne Salcido, Miranda Rendon
+#Names: Eulalia Pedro Andres, Miranda Rendon, Marlenne Salcido
 #2640-12PM
 
 .include "macros.asm"
@@ -10,6 +10,7 @@
 	.eqv RED 0xff3769
 	.eqv BLACK 0x000000
 	.eqv PURPLE 0xf539ff
+board: .space 9 
 intro: .asciiz "Welcome to Tic Tac Toe!\n\n"
 modePrompt: .asciiz "\n\nWould you like to play (1) One Player or (2) Two Player: "
 onePlayerStartPrompt: .asciiz "First move goes to (1) You or (2) CPU: "
@@ -34,7 +35,7 @@ main:
 	#prints introduction to program string
 	printString(intro)
 	ogBoard
-
+	la $s4, board #board address in $s4
 
 
 #start of gameplay		
@@ -45,7 +46,7 @@ aGame:
 	move $t0, $v0 #$t0 stores which mode player wants to play
 
 	beq $t0, 1, onePlay
-	beq $t0, 2, twoPlay
+	#beq $t0, 2, twoPlay
 	
 	#if not valid print prompt and asks again
 	printString(reprompt)
@@ -55,40 +56,43 @@ aGame:
 onePlay:
 	printString(onePlayerStartPrompt)
 	getInt
-	move $t3, $v0 #$t3 stores who gets the first move
-	#logic is currently not accounting for who starts. Might not ask in final product
-	printString(userTurnPrompt)
-	#if not valid print prompt and asks again
-	#printString(reprompt)
-	#j onePlay
-	
-	printString(moveChoice)
-	getInt
-	move $t4, $v0 #$t4 store where user wants to mark
-	j replay
-	#game with two users
-	twoPlay:
-	printString(twoPlayersStartPrompt)
-	getInt
-	move $t3, $v0 #$t3 stores who gets the first move
-	#logic is currently not accounting for who starts. Might not ask in final product
+	move $t3, $v0 # $t3 = current player (1 = user, 2 = CPU)
 
-	#Player 1 Turn
-	printString(Player1TurnPrompt)
-	printString(moveChoice)
-	getInt
-	move $t4, $v0 #$t4 store where Player 1 wants to mark
-	drawSymbol($t3, $t4)
-	addi $t3, $t3, 1
-	#Player 2 Turn
-	printString(Player2TurnPrompt)
-	printString(moveChoice)
-	getInt
-	move $t4, $v0 #$t4 store where Player 2 wants to mark
-	drawSymbol($t3, $t4)
-	subi $t3, $t3, 1
+	# Clear board (optional reset)
+	# TODO: implement a clear bitmap if needed
 
-	j replay
+	gameLoop1P:
+		beq $t3, 1, userTurn
+		beq $t3, 2, cpuTurn
+		
+	userTurn:
+		printString(userTurnPrompt)
+	userInput:
+		printString(moveChoice)
+		getInt
+		move $t4, $v0		# $t4 = square to mark
+		addi $t5, $t4, -1      # convert to 0-based index
+		sb $t3, 0($s4)         # temporarily use $s4
+		add $t6, $s4, $t5
+		lb $t7, 0($t6)           # load value from board[square-1]
+		bnez $t7, userInput      # if not 0, already taken → ask again
+		drawSymbol($t3, $t4)
+		sb $t3, 0($t6)           # mark the square
+		li $t3, 2                # switch to CPU
+		j gameLoop1P
+
+	cpuTurn:
+		printString(CPUTurnPrompt)
+		# Simple CPU logic: pick square 5 if open, else 1 (for now, hardcoded)
+		li $t4, 5
+		# TODO: add logic to check if square is taken
+		drawSymbol($t3, $t4)
+		# TODO: update board array
+		# TODO: check win condition
+		li $t3, 1  # Switch back to user
+		j gameLoop1P
+		
+		#TODO: jump to replay
 
 #chack if user wants to play again			
 replay:		
