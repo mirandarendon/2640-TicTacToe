@@ -7,8 +7,9 @@
 .space 256 #save space for bitmap colors
 	.space 1000 #save space for bitmap
 	.eqv BLUE 0x189BCC
-	.eqv GREEN 0xbecc41
+	.eqv RED 0xff3769
 	.eqv LIBLUE 0x8dd7f8
+	.eqv PURPLE 0xf539ff
 intro: .asciiz "Welcome to Tic Tac Toe!\n\n"
 modePrompt: .asciiz "\n\nWould you like to play (1) One Player or (2) Two Player: "
 onePlayerStartPrompt: .asciiz "First move goes to (1) You or (2) CPU: "
@@ -77,11 +78,15 @@ onePlay:
 	printString(moveChoice)
 	getInt
 	move $t4, $v0 #$t4 store where Player 1 wants to mark
+	drawSymbol($t3, $t4)
+	addi $t3, $t3, 1
 	#Player 2 Turn
 	printString(Player2TurnPrompt)
 	printString(moveChoice)
 	getInt
-	move $t5, $v0 #$t5 store where Player 2 wants to mark
+	move $t4, $v0 #$t4 store where Player 2 wants to mark
+	drawSymbol($t3, $t4)
+	subi $t3, $t3, 1
 
 	j replay
 
