@@ -72,7 +72,7 @@ onePlay:
 		getInt
 		move $t4, $v0		# $t4 = square to mark
 		addi $t5, $t4, -1      # convert to 0-based index
-		sb $t3, 0($s4)         # temporarily use $s4
+		#sb $t3, 0($s4)         # temporarily use $s4
 		add $t6, $s4, $t5
 		lb $t7, 0($t6)           # load value from board[square-1]
 		bnez $t7, userInput      # if not 0, already taken → ask again
