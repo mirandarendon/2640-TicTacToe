@@ -211,6 +211,19 @@
 	
 	endDrawing:
 .end_macro
+
+.macro clearBitmap
+	add $s2, $zero, 1
+	clearLoop:
+	li $s1, BLACK
+	sw $s1, 0($s0)
+	addi $s0, $s0, 4
+	addi $s2, $s2, 1
+	beq $s2, 257, cleared
+	j clearLoop
+	cleared:
+		subi $s0, $s0, 1020
+.end_macro
 	
 	
 	

@@ -8,7 +8,7 @@
 	.space 1000 #save space for bitmap
 	.eqv BLUE 0x189BCC
 	.eqv RED 0xff3769
-	.eqv LIBLUE 0x8dd7f8
+	.eqv BLACK 0x000000
 	.eqv PURPLE 0xf539ff
 intro: .asciiz "Welcome to Tic Tac Toe!\n\n"
 modePrompt: .asciiz "\n\nWould you like to play (1) One Player or (2) Two Player: "
@@ -34,12 +34,12 @@ main:
 	#prints introduction to program string
 	printString(intro)
 	ogBoard
-	ogBoardBitmap
 
 
 
 #start of gameplay		
 aGame:
+	ogBoardBitmap
 	printString(modePrompt)
 	getInt
 	move $t0, $v0 #$t0 stores which mode player wants to play
@@ -95,6 +95,7 @@ replay:
 	printString(anotherRound)
 	getInt
 	move $t1, $v0 #$t1 stores whether another round will be played
+	clearBitmap
 	beq $t1, 1, aGame
 	beq $t1, 2, exit
 	
