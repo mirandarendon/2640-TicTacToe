@@ -14,7 +14,7 @@ board: .space 9
 intro: .asciiz "Welcome to Tic Tac Toe!\n\n"
 modePrompt: .asciiz "\n\nWould you like to play (1) One Player or (2) Two Player: "
 onePlayerStartPrompt: .asciiz "First move goes to (1) You or (2) CPU: "
-twoPlayersStartPrompt: .asciiz "First move goes to (1) Player 1 or (2) Player 2: "
+twoPlayersStartPrompt: .asciiz "\nFirst move goes to (1) Player 1 or (2) Player 2: "
 userTurnPrompt: .asciiz "\n---Your Turn---\n"
 CPUTurnPrompt: .asciiz "\n---CPU's Turn---\n"
 Player1TurnPrompt: .asciiz "\n---Player 1's Turn---\n"
@@ -46,7 +46,7 @@ aGame:
 	move $t0, $v0 #$t0 stores which mode player wants to play
 
 	beq $t0, 1, onePlay
-	#beq $t0, 2, twoPlay
+	beq $t0, 2, twoPlay
 	
 	#if not valid print prompt and asks again
 	printString(reprompt)
@@ -81,7 +81,7 @@ onePlay:
 	winCheck:
 		checkWinner($s4, $t9)
 		bnez $t9, handleWin
-
+		
 		j gameLoop1P
 
 	cpuTurn:
@@ -101,9 +101,10 @@ onePlay:
 		drawSymbol($t3, $t4)   # draw CPU move
 		sb $t3, 0($t6)         # mark board[index] = 2
 		li $t3, 1              # switch turn to user
-		j gameLoop1P
+		j gameLoop1P	
 		
 handleWin:
+
 	beq $t0, 1, winOne
 	beq $t0, 2, winTwo
 	
@@ -128,14 +129,68 @@ handleWin:
 			printString(player1Wins)
 			j replay
 		twoWin:
-			printString(player2Wins)
+			printString(player2Wins) 
 			j replay
 			
 		tieGame:
 			printString(tieCase)
 			j replay
 
-#chack if user wants to play again			
+#game with 2 playeres	
+twoPlay:
+	printString(twoPlayersStartPrompt)
+	getInt
+	move $t3, $v0 # $t3 = current player (1 = user, 2 = player2)
+
+	twoPlayerLoop:
+		beq $t3, 1, P1prompt #if play 1 goes first
+		beq $t3, 2, P2prompt #if play 2 goes first
+		#if the input is not 1 or 2
+        	printString(reprompt) 
+        	j twoPlay
+		
+	P1prompt:
+		printString(Player1TurnPrompt)
+	player1Turn:
+		printString(moveChoice)
+		getInt
+		move $t4, $v0		# $t4 = square to mark
+		addi $t5, $t4, -1      # convert to 0-based index
+		
+		add $t6, $s4, $t5
+		lb $t7, 0($t6)           # load value from board[square-1]
+		bnez $t7, player1Turn      # if not 0, already taken → ask again
+		drawSymbol($t3, $t4)
+		sb $t3, 0($t6)           # mark the square
+		
+		checkWinner($s4, $t9) #cheks to see if the player won
+		bnez $t9, handleWin   #jumps to handleWin
+		
+		li $t3, 2                # switch to player 2
+		j twoPlayerLoop
+	 
+		 
+	P2prompt: #print the prompt for player 2
+		printString(Player2TurnPrompt)
+	player2Turn:
+		printString(moveChoice)
+		getInt
+		move $t4, $v0		# $t4 = square to mark
+		addi $t5, $t4, -1      # convert to 0-based index
+		
+		add $t6, $s4, $t5
+		lb $t7, 0($t6)           # load value from board[square-1]
+		bnez $t7, player2Turn      # prompts the player2 msg again
+		drawSymbol($t3, $t4)
+		sb $t3, 0($t6)           # mark the square
+
+		checkWinner($s4, $t9) #cheks to see if the player won
+		bnez $t9, handleWin #if player won
+
+		li $t3, 1                # switch to player 1
+		j twoPlayerLoop
+
+#check if user wants to play again			
 replay:		
 	printString(anotherRound)
 	getInt
