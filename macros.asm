@@ -210,6 +210,9 @@
 .end_macro
 
 .macro clearBitmap
+	.data
+		.eqv BLACK 0x000000
+	.text
 	add $s2, $zero, 1
 	clearLoop:
 	li $s1, BLACK
@@ -219,9 +222,121 @@
 	beq $s2, 257, cleared
 	j clearLoop
 	cleared:
-		subi $s0, $s0, 1020
+		subi $s0, $s0, 1024
 .end_macro
 	
-	
-	
-	
+
+.macro checkWinner(%boardPtr, %resultReg)
+	move $t2, %boardPtr  # base pointer to board
+	li $t9, 0            # default = no winner
+
+	# --- Check each win combination ---
+	# Format: if posA == posB == posC and not 0 → win
+
+	# Row 1: 0 1 2
+	lb $s1, 0($t2)
+	lb $s2, 1($t2)
+	lb $s3, 2($t2)
+	beqz $s1, skip1
+	beq $s1, $s2, r1check
+	j skip1
+r1check: beq $s2, $s3, winFound
+skip1:
+	# Row 2: 3 4 5
+	lb $s1, 3($t2)
+	lb $s2, 4($t2)
+	lb $s3, 5($t2)
+	beqz $s1, skip2
+	beq $s1, $s2, r2check
+	j skip2
+r2check: beq $s2, $s3, winFound
+skip2:
+	# Row 3: 6 7 8
+	lb $s1, 6($t2)
+	lb $s2, 7($t2)
+	lb $s3, 8($t2)
+	beqz $s1, skip3
+	beq $s1, $s2, r3check
+	j skip3
+r3check: beq $s2, $s3, winFound
+skip3:
+	# Col 1: 0 3 6
+	lb $s1, 0($t2)
+	lb $s2, 3($t2)
+	lb $s3, 6($t2)
+	beqz $s1, skip4
+	beq $s1, $s2, c1check
+	j skip4
+c1check: beq $s2, $s3, winFound
+skip4:
+	# Col 2: 1 4 7
+	lb $s1, 1($t2)
+	lb $s2, 4($t2)
+	lb $s3, 7($t2)
+	beqz $s1, skip5
+	beq $s1, $s2, c2check
+	j skip5
+c2check: beq $s2, $s3, winFound
+skip5:
+	# Col 3: 2 5 8
+	lb $s1, 2($t2)
+	lb $s2, 5($t2)
+	lb $s3, 8($t2)
+	beqz $s1, skip6
+	beq $s1, $s2, c3check
+	j skip6
+c3check: beq $s2, $s3, winFound
+skip6:
+	# Diagonal 1: 0 4 8
+	lb $s1, 0($t2)
+	lb $s2, 4($t2)
+	lb $s3, 8($t2)
+	beqz $s1, skip7
+	beq $s1, $s2, d1check
+	j skip7
+d1check: beq $s2, $s3, winFound
+skip7:
+	# Diagonal 2: 2 4 6
+	lb $s1, 2($t2)
+	lb $s2, 4($t2)
+	lb $s3, 6($t2)
+	beqz $s1, noWinYet
+	beq $s1, $s2, d2check
+	j noWinYet
+d2check: beq $s2, $s3, winFound
+# No win yet — check for tie
+noWinYet:
+	li $t8, 0      # index = 0
+	li $t9, 3      # default to tie
+	move $t5, $t2
+tieScan:
+	lb $t7, 0($t2)
+	beqz $t7, stillPlaying  # if any cell is empty → still playing
+	addi $t8, $t8, 1
+	addi $t2, $t2, 1
+	li $t6, 9
+	blt $t8, $t6, tieScan
+	j endCheck
+stillPlaying:
+	li $t9, 0      # not tie, not win → game still going
+endCheck:
+	move $t2, $t5
+	move %resultReg, $t9
+	j finishCheck
+winFound:
+	move %resultReg, $s1
+
+finishCheck:
+.end_macro
+
+.macro resetBoard(%boardPtr)
+    li $t0, 0 # index
+    move $t2, %boardPtr
+
+resetLoop:
+    sb $zero, 0($t2)
+    addi $t2, $t2, 1
+    addi $t0, $t0, 1
+    blt $t0, 9, resetLoop
+.end_macro
+

@@ -21,9 +21,10 @@ Player1TurnPrompt: .asciiz "\n---Player 1's Turn---\n"
 Player2TurnPrompt: .asciiz "\n---Player 2's Turn---\n"
 userWins: .asciiz "You win!"
 userLoses: .asciiz "You lose!"
-player1Wins: "Player 1 wins!"
-player2Wins: "Player 2 wins!"
-moveChoice: "Which square would you like to mark? Please enter a value from 1-9: "
+player1Wins: .asciiz  "Player 1 wins!"
+player2Wins: .asciiz "Player 2 wins!"
+tieCase: .asciiz "It's a tie!"
+moveChoice: .asciiz "Which square would you like to mark? Please enter a value from 1-9: "
 row: .asciiz "----------------------------------------------------------"
 anotherRound: .asciiz "\n\nWould you like to play again? (1) Yes or (2) No: "
 reprompt: .asciiz "That is not a valid input"
@@ -35,10 +36,11 @@ main:
 	#prints introduction to program string
 	printString(intro)
 	ogBoard
+	clearBitmap #clears bitmap incase of a new game
 	la $s4, board #board address in $s4
-
-
-#start of gameplay		
+	resetBoard($s4)
+	
+#start of gameplay		 
 aGame:
 	ogBoardBitmap
 	printString(modePrompt)
@@ -58,12 +60,12 @@ onePlay:
 	getInt
 	move $t3, $v0 # $t3 = current player (1 = user, 2 = CPU)
 
-	# Clear board (optional reset)
-	# TODO: implement a clear bitmap if needed
-
 	gameLoop1P:
 		beq $t3, 1, userTurn
 		beq $t3, 2, cpuTurn
+		
+		printString(reprompt)
+		j onePlay
 		
 	userTurn:
 		printString(userTurnPrompt)
@@ -72,27 +74,68 @@ onePlay:
 		getInt
 		move $t4, $v0		# $t4 = square to mark
 		addi $t5, $t4, -1      # convert to 0-based index
-		#sb $t3, 0($s4)         # temporarily use $s4
-		add $t6, $s4, $t5
+		add $t6, $s4, $t5	# stores offset of 
 		lb $t7, 0($t6)           # load value from board[square-1]
 		bnez $t7, userInput      # if not 0, already taken → ask again
 		drawSymbol($t3, $t4)
 		sb $t3, 0($t6)           # mark the square
 		li $t3, 2                # switch to CPU
+	winCheck:
+		checkWinner($s4, $t9)
+		bnez $t9, handleWin
+
 		j gameLoop1P
 
 	cpuTurn:
 		printString(CPUTurnPrompt)
-		# Simple CPU logic: pick square 5 if open, else 1 (for now, hardcoded)
-		li $t4, 5
-		# TODO: add logic to check if square is taken
-		drawSymbol($t3, $t4)
-		# TODO: update board array
-		# TODO: check win condition
-		li $t3, 1  # Switch back to user
+	
+	randomLoop:
+		li $v0, 42             # syscall for random int
+		li $a1, 9              # upper bound (0 to 8)
+		syscall
+		move $t5, $a0          # $t5 = random index (0-8)
+
+		add $t6, $s4, $t5      # get address of board[index]
+		lb $t7, 0($t6)         # check if square is empty
+		bnez $t7, randomLoop   # if not empty, try again
+
+		addi $t4, $t5, 1       # convert to 1–9 for drawSymbol
+		drawSymbol($t3, $t4)   # draw CPU move
+		sb $t3, 0($t6)         # mark board[index] = 2
+		li $t3, 1              # switch turn to user
 		j gameLoop1P
 		
-		#TODO: jump to replay
+handleWin:
+	beq $t0, 1, winOne
+	beq $t0, 2, winTwo
+	
+	winOne:
+		beq $t9, 1, useWin
+		beq $t9, 2, cpuWin
+		beq $t9, 3, tieGame
+		
+		useWin: 
+			printString(userWins)
+			j replay
+		cpuWin: 
+			printString(userLoses)
+			j replay
+
+	winTwo:
+		beq $t9, 1, oneWin
+		beq $t9, 2, twoWin
+		beq $t9, 3, tieGame
+		
+		oneWin:
+			printString(player1Wins)
+			j replay
+		twoWin:
+			printString(player2Wins)
+			j replay
+			
+		tieGame:
+			printString(tieCase)
+			j replay
 
 #chack if user wants to play again			
 replay:		
