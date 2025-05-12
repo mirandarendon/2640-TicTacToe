@@ -14,7 +14,7 @@ board: .space 9
 intro: .asciiz "Welcome to Tic Tac Toe!\n\n"
 modePrompt: .asciiz "\n\nWould you like to play (1) One Player or (2) Two Player: "
 onePlayerStartPrompt: .asciiz "\n\nFirst move goes to (1) You or (2) CPU: "
-twoPlayersStartPrompt: .asciiz "\nFirst move goes to (1) Player 1 or (2) Player 2: "
+twoPlayersStartPrompt: .asciiz "\n\nFirst move goes to (1) Player 1 or (2) Player 2: "
 userTurnPrompt: .asciiz "\n---Your Turn---\n"
 CPUTurnPrompt: .asciiz "\n---CPU's Turn---\n"
 Player1TurnPrompt: .asciiz "\n---Player 1's Turn---\n"
