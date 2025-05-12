@@ -13,7 +13,7 @@
 board: .space 9 
 intro: .asciiz "Welcome to Tic Tac Toe!\n\n"
 modePrompt: .asciiz "\n\nWould you like to play (1) One Player or (2) Two Player: "
-onePlayerStartPrompt: .asciiz "First move goes to (1) You or (2) CPU: "
+onePlayerStartPrompt: .asciiz "\n\nFirst move goes to (1) You or (2) CPU: "
 twoPlayersStartPrompt: .asciiz "\nFirst move goes to (1) Player 1 or (2) Player 2: "
 userTurnPrompt: .asciiz "\n---Your Turn---\n"
 CPUTurnPrompt: .asciiz "\n---CPU's Turn---\n"
@@ -71,6 +71,8 @@ onePlay:
 		printString(moveChoice)
 		getInt
 		move $t4, $v0		# $t4 = square to mark
+		blt $t4, 1, userOutOfBounds
+		bgt $t4, 9, userOutOfBounds
 		addi $t5, $t4, -1      # convert to 0-based index
 		add $t6, $s4, $t5	# stores offset of 
 		lb $t7, 0($t6)           # load value from board[square-1]
@@ -78,6 +80,9 @@ onePlay:
 		drawSymbol($t3, $t4)
 		sb $t3, 0($t6)           # mark the square
 		li $t3, 2                # switch to CPU
+		j winCheck
+		userOutOfBounds:
+			j userInput
 	winCheck:
 		checkWinner($s4, $t9)
 		bnez $t9, handleWin
@@ -101,7 +106,11 @@ onePlay:
 		drawSymbol($t3, $t4)   # draw CPU move
 		sb $t3, 0($t6)         # mark board[index] = 2
 		li $t3, 1              # switch turn to user
-		j gameLoop1P	
+	winCheckCPU:
+		checkWinner($s4, $t9)
+		bnez $t9, handleWin
+		
+		j gameLoop1P
 		
 handleWin:
 
@@ -155,6 +164,8 @@ twoPlay:
 		printString(moveChoice)
 		getInt
 		move $t4, $v0		# $t4 = square to mark
+		blt $t4, 1, p1OutOfBounds
+		bgt $t4, 9, p1OutOfBounds
 		addi $t5, $t4, -1      # convert to 0-based index
 		
 		add $t6, $s4, $t5
@@ -168,6 +179,8 @@ twoPlay:
 		
 		li $t3, 2                # switch to player 2
 		j twoPlayerLoop
+		p1OutOfBounds:
+			j player1Turn
 	 
 		 
 	P2prompt: #print the prompt for player 2
@@ -176,6 +189,8 @@ twoPlay:
 		printString(moveChoice)
 		getInt
 		move $t4, $v0		# $t4 = square to mark
+		blt $t4, 1, p2OutOfBounds
+		bgt $t4, 9, p2OutOfBounds
 		addi $t5, $t4, -1      # convert to 0-based index
 		
 		add $t6, $s4, $t5
@@ -189,6 +204,8 @@ twoPlay:
 
 		li $t3, 1                # switch to player 1
 		j twoPlayerLoop
+		p2OutOfBounds:
+			j player2Turn
 
 #check if user wants to play again			
 replay:		
