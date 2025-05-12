@@ -36,9 +36,7 @@ main:
 	#prints introduction to program string
 	printString(intro)
 	ogBoard
-	clearBitmap #clears bitmap incase of a new game
 	la $s4, board #board address in $s4
-	resetBoard($s4)
 	
 #start of gameplay		 
 aGame:
@@ -142,6 +140,7 @@ replay:
 	printString(anotherRound)
 	getInt
 	move $t1, $v0 #$t1 stores whether another round will be played
+	resetBoard($s4)
 	clearBitmap
 	beq $t1, 1, aGame
 	beq $t1, 2, exit
